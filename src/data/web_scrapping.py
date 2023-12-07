@@ -6,6 +6,7 @@ from tqdm import tqdm
 from time import sleep
 from time import time
 
+
 class WebScrapping_RatedComments():
     @staticmethod
     def WebScrapping_Comments(url_to_scrap, nbr_pages):

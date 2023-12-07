@@ -1,7 +1,7 @@
 MLOps Sentiment Analysis
 ==============================
 
-This project is a starting Pack for MLOps projects based on the subject "movie_recommandation". 
+This project is a MLOps project based on the subject "sentiment analysis". 
 
 Project Organization
 ------------

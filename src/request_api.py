@@ -13,7 +13,7 @@ headers = {
 }
 payload = {
     'url': 'https://fr.trustpilot.com/review/www.cdiscount.com?date=last30days',
-    'nbr_pages': 2
+    'nbr_pages': 50
 }
 response = requests.post('http://127.0.0.1:8001/scrap_last30days', headers=headers, json=payload)
 print(response.text)

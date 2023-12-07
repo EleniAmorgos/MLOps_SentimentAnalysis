@@ -101,7 +101,7 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
     # Nom du CSV où les données seront écrites
     csv_filename = 'cdiscount_last30days.csv'
     # Répertoire de données depuis le répertoire src
-    external_data_path = os.path.join('..', '..', 'data', 'external')
+    external_data_path = os.path.join( '..', 'data', 'external')
     # print(external_data_path)
     # Si le répertoire n'existe pas, on le crée
     os.makedirs(external_data_path, exist_ok=True)
