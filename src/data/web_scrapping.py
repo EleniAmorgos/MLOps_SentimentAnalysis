@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from time import sleep
 from time import time
+import datetime
 
 
 class WebScrapping_RatedComments():
@@ -83,6 +84,11 @@ class WebScrapping_RatedComments():
 
         # constitution d'un DataFrame à partir du dictionnaire 
         df = pd.DataFrame(dico)
+        df['import_source'] = url_to_scrap
+        # Get the current date and time
+        current_datetime = datetime.datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        df['import_date'] = formatted_datetime
 
         # affichage du temps de calcul par rapport  à l'initialisation en début de requête 
         print('le temps de calcul est de {:.2f} secondes'.format(time()-t0))

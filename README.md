@@ -34,7 +34,7 @@ Project Organization
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
-    │   │   └── web_scrapping.py : Class to scrap comments from a Trustpilot url
+    │   │   └── web_scrapping.py : Scraps comments from a Trustpilot url with source (url) and scrap date
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
     │   │   └── build_features.py

@@ -13,6 +13,7 @@ from time import sleep
 from time import time
 
 from data.web_scrapping import WebScrapping_RatedComments
+from features.build_features import Process_Comments
 
 api = FastAPI(
     title="API Sentiment analysis",
@@ -119,3 +120,62 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
     df.to_csv(csv_filepath, sep=';', quotechar='"', index=False)
 
     return {'message': f"Data written to: {csv_filepath} {str(len(df))} rows" }
+
+
+
+@api.post('/process_comments', tags=['administration'])
+async def process_comments(current_user: str = Depends(get_current_user)):
+    """
+    Endpoint pour processer les commentaires scrappés. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
+
+    Args:
+        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+
+    Returns:
+        dict: Un message indiquant si le data processing a réussi.
+    """
+    if "admin" not in current_user["role"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission refusée. Seul un administrateur peut scrapper des données",
+        )
+
+    # Nom du CSV où les données sont lues
+    csv_filename_input = 'cdiscount_last30days.csv'
+    # Répertoire de données depuis le répertoire src
+    external_data_path = os.path.join( '..', 'data', 'external')
+    print("external_data_path : ",external_data_path)
+    # Construit le chemin complet pour atteindre le csv
+    csv_filepath_input = os.path.join(external_data_path, csv_filename_input)
+    print("csv_filepath_input : ", csv_filepath_input)
+    # Vérifier l'existence du répertoire
+    if not os.path.exists(external_data_path) or not os.path.isdir(external_data_path):
+        print(f"Le répertoire {external_data_path} n'existe pas.")
+        exit()
+    # Vérifier l'existence du fichier
+    if not os.path.exists(csv_filepath_input) or not os.path.isfile(csv_filepath_input):
+        print(f"Le fichier {csv_filepath_input} n'existe pas.")
+        exit()
+
+    # Le répertoire et le fichier existent, poursuivre avec le reste du code
+    print(f"Le répertoire {external_data_path} et le fichier {csv_filepath_input} existent.")
+
+
+    # Nom du CSV où les données seront écrites
+    csv_filename_output = 'cdiscount_last30days_processed.csv'
+    print("csv_filename_output : ", csv_filename_output)
+    # Répertoire de données depuis le répertoire src
+    interim_data_path = os.path.join( '..', 'data', 'interim')
+    print("interim_data_path :" , interim_data_path)
+    # Si le répertoire n'existe pas, on le crée
+    os.makedirs(interim_data_path, exist_ok=True)
+    # Construit le chemin complet pour atteindre le csv
+    csv_filepath_output = os.path.join(interim_data_path, csv_filename_output)
+    print("csv_filepath_output : ", csv_filepath_output)
+
+
+    df = Process_Comments.Process_Comments_Notes(csv_filepath_input)
+
+    df.to_csv(csv_filepath_output, sep=';', quotechar='"', index=False)
+
+    return {'message': f"Data written to: {csv_filepath_output} {str(len(df))} rows" }
