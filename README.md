@@ -1,7 +1,7 @@
 MLOps Sentiment Analysis
 ==============================
 
-This project is a starting Pack for MLOps projects based on the subject "movie_recommandation". It's not perfect so feel free to make some modifications on it.
+This project is a starting Pack for MLOps projects based on the subject "movie_recommandation". 
 
 Project Organization
 ------------
@@ -9,7 +9,7 @@ Project Organization
     ├── LICENSE
     ├── README.md          <- The top-level README for developers using this project.
     ├── data
-    │   ├── external       <- Data from third party sources.
+    │   ├── external       <- Data from third party sources (Web scrapping)
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
