@@ -77,6 +77,11 @@ target/
 
 # exclude data from source control by default
 /data/
+# exclude draft code from source control by default
+/src/draft/
+
+/src/test_code.py
+
 
 # Mac OS-specific storage files
 .DS_Store
