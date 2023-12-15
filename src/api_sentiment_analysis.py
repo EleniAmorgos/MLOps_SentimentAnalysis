@@ -23,6 +23,7 @@ api = FastAPI(
         {'name': 'home', 'description': 'Fonctions de base'},
         {'name': 'sentiment_analysis', 'description': 'Fonctions d analyse des sentiments'},
         {'name': 'scrapping', 'description': 'Fonctions réservées à la génération de nouvelles données'},
+        {'name': 'data management', 'description': 'Fonctions réservées à la génération de nouvelles données'},
         {'name': 'training', 'description': 'Fonctions réservées l entrainement de modèles'}
 ]
 )
@@ -45,12 +46,6 @@ class Scrapping_Request(BaseModel):
     url: str
     nbr_pages: Optional[int] = 1
 
-
-def load_csv():
-    """ Charge le fichier et renvoie les lignes (commentaires) sous forme de liste de dictionnaires
-    """
-    with open(csv_name,'r',encoding='utf8') as question_file:
-        return list(csv.DictReader(question_file))
 
 security = HTTPBasic()
 
@@ -76,7 +71,7 @@ async def get_item():
     return {'message' : 'API fonctionnelle'}
 
 
-@api.post('/scrap_last30days', tags=['administration'])
+@api.post('/scrap_last30days', tags=['scrapping'])
 async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str = Depends(get_current_user)):
     """
     Endpoint pour scrapper. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
@@ -100,7 +95,7 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
     }
     
     # Nom du CSV où les données seront écrites
-    csv_filename = 'cdiscount_last30days.csv'
+    csv_filename = 'scrapped_comments.csv'
     # Répertoire de données depuis le répertoire src
     external_data_path = os.path.join( '..', 'data', 'external')
     # print(external_data_path)
@@ -123,7 +118,7 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
 
 
 
-@api.post('/process_comments', tags=['administration'])
+@api.post('/process_comments', tags=['data management'])
 async def process_comments(current_user: str = Depends(get_current_user)):
     """
     Endpoint pour processer les commentaires scrappés. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
@@ -141,7 +136,7 @@ async def process_comments(current_user: str = Depends(get_current_user)):
         )
 
     # Nom du CSV où les données sont lues
-    csv_filename_input = 'cdiscount_last30days.csv'
+    csv_filename_input = 'scrapped_comments.csv'
     # Répertoire de données depuis le répertoire src
     external_data_path = os.path.join( '..', 'data', 'external')
     print("external_data_path : ",external_data_path)
@@ -162,7 +157,7 @@ async def process_comments(current_user: str = Depends(get_current_user)):
 
 
     # Nom du CSV où les données seront écrites
-    csv_filename_output = 'cdiscount_last30days_processed.csv'
+    csv_filename_output = 'scrapped_comments_processed.csv'
     print("csv_filename_output : ", csv_filename_output)
     # Répertoire de données depuis le répertoire src
     interim_data_path = os.path.join( '..', 'data', 'interim')
@@ -179,3 +174,69 @@ async def process_comments(current_user: str = Depends(get_current_user)):
     df.to_csv(csv_filepath_output, sep=';', quotechar='"', index=False)
 
     return {'message': f"Data written to: {csv_filepath_output} {str(len(df))} rows" }
+
+
+
+
+@api.post('/histo_process_comments', tags=['data management'])
+async def histo_process_comments(current_user: str = Depends(get_current_user)):
+    """
+    Endpoint pour historiser les commentaires scrappés. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
+
+    Args:
+        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+
+    Returns:
+        dict: Un message indiquant si le data processing a réussi.
+    """
+    if "admin" not in current_user["role"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission refusée. Seul un administrateur peut scrapper des données",
+        )
+
+    # Nom du CSV où les données à historiser sont lues
+    csv_filename_input = 'scrapped_comments_processed.csv'
+    # Répertoire de données depuis le répertoire src
+    interim_data_path = os.path.join( '..', 'data', 'interim')
+    print("interim_data_path : ",interim_data_path)
+    # Construit le chemin complet pour atteindre le csv
+    csv_filepath_input = os.path.join(interim_data_path, csv_filename_input)
+    print("csv_filepath_input : ", csv_filepath_input)
+    # Vérifier l'existence du répertoire
+    if not os.path.exists(interim_data_path) or not os.path.isdir(interim_data_path):
+        print(f"Le répertoire {interim_data_path} n'existe pas.")
+        exit()
+    # Vérifier l'existence du fichier
+    if not os.path.exists(csv_filepath_input) or not os.path.isfile(csv_filepath_input):
+        print(f"Le fichier {csv_filepath_input} n'existe pas.")
+        exit()
+    # Le répertoire et le fichier existent, poursuivre avec le reste du code
+    print(f"Le répertoire {interim_data_path} et le fichier {csv_filepath_input} existent.")
+
+    # Nom du CSV où les données déjà historisées sont lues puis réécrites après ajout des nouvelles données
+    csv_filename_histo = 'processed_comments_histo.csv'
+    # Répertoire de données depuis le répertoire src
+    processed_data_path = os.path.join( '..', 'data', 'processed')
+    print("processed_data_path : ",processed_data_path)
+    # Construit le chemin complet pour atteindre le csv
+    csv_filepath_histo = os.path.join(processed_data_path, csv_filename_histo)
+    print("csv_filepath_histo : ", csv_filepath_histo)
+    # Vérifier l'existence du répertoire
+    if not os.path.exists(processed_data_path) or not os.path.isdir(processed_data_path):
+        print(f"Le répertoire {processed_data_path} n'existe pas.")
+        exit()
+    # Vérifier l'existence du fichier
+    if not os.path.exists(csv_filepath_histo) or not os.path.isfile(csv_filepath_histo):
+        print(f"Le fichier {csv_filepath_histo} n'existe pas.")
+        exit()
+
+    # Le répertoire et le fichier existent, poursuivre avec le reste du code
+    print(f"Le répertoire {processed_data_path} et le fichier {csv_filepath_histo} existent.")
+
+    result_dico = Process_Comments.Histo_New_Comments(csv_filepath_input,csv_filepath_histo)
+    df_result = result_dico['df_result']
+    df_result.to_csv(csv_filepath_histo, sep=';', quotechar='"', index=False)
+    print (result_dico['nb_rows_input'], result_dico['nb_rows_histo'], result_dico['nb_rows_added_to_histo'], len(df_result))
+
+    return {'message': f"Data written to: {csv_filepath_histo} : {str(result_dico['nb_rows_added_to_histo'])} rows added to {str(result_dico['nb_rows_histo'])} in histo : {str(len(df_result))} in total"}

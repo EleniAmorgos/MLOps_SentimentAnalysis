@@ -34,10 +34,10 @@ Project Organization
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
-    │   │   └── web_scrapping.py : Scraps comments from a Trustpilot url with source (url) and scrap date
+    │   │   └── web_scrapping.py : Scraps comments from Trustpilot
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
+    │   │   └── build_features.py : Processes and archives the comments (new comments into histo)
     │   │
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions

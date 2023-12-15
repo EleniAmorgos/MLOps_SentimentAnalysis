@@ -12,6 +12,8 @@ from nltk import word_tokenize
 from nltk.tokenize.regexp import RegexpTokenizer
 from nltk.tokenize import PunktSentenceTokenizer
 
+from urllib.parse import urlsplit
+
 
 class Process_Comments():
     @staticmethod
@@ -52,3 +54,61 @@ class Process_Comments():
         print(df['note'].value_counts())
 
         return (df)
+    
+    @staticmethod
+    def extract_base_url(url):
+        # Use urlsplit to parse the URL
+        parsed_url = urlsplit(url)
+        # Reconstruct the base URL from the parsed components
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+        return base_url
+
+
+    @staticmethod
+    def Histo_New_Comments(csv_filepath_input, csv_filepath_histo):
+        # Df contenant les données du csv des nouveaux commentaires scrappés et processés
+        df_input = pd.read_csv(csv_filepath_input, sep=';', quotechar='"')
+        # Df contenant l'historique des commentaires scrappés et processés
+        df_histo = pd.read_csv(csv_filepath_histo, sep=';', quotechar='"')
+
+        df_histo_initial_columns=df_histo.columns.to_list()
+        print("df_histo_initial_columns : ", df_histo_initial_columns)
+
+        df_input['date_day'] = pd.to_datetime(df_input['date']).dt.strftime('%Y%m%d')
+        df_histo['date_day'] = pd.to_datetime(df_histo['date']).dt.strftime('%Y%m%d')
+        df_input['import_source_url'] = df_input['import_source'].apply(Process_Comments.extract_base_url)
+        df_histo['import_source_url'] = df_histo['import_source'].apply(Process_Comments.extract_base_url)
+        
+        print ("df_input : " , len(df_input))
+        print ("df_input.columns : " , df_input.columns)
+        print ("df_histo : " , len(df_histo))
+        # Compte le nombre de lignes par source x jour dans df_input
+        result_count_input = df_input.groupby(['import_source_url', 'date_day']).size().reset_index(name='row_count')
+        result_count_input = result_count_input.sort_values(by=['import_source_url', 'date_day'])
+        
+        # Compte le nombre de lignes par source x jour dans df_result
+        result_count_histo = df_histo.groupby(['import_source_url', 'date_day']).size().reset_index(name='row_count')
+        result_count_histo = result_count_histo.sort_values(by=['import_source_url', 'date_day'])
+        print("result_count_histo.columns :" , result_count_histo.columns)
+
+        # ajoute à df_input les colonnes de result_count_histo (left join)
+        # si ces colonnes sont vides, il n'y a donc pas de correspondance source x jour dans df_histo
+        merged_df = pd.merge(df_input, result_count_histo, on=['import_source_url', 'date_day'], how='left', suffixes=('_input', '_count'))
+        print("merged_df.columns : " , merged_df.columns)
+        print("merged_df : " , len (merged_df))
+
+        # Filtre les lignes sans correspondances ds l'histo = "nouveaux" commentaires
+        df_input_rows_with_no_match = merged_df[merged_df['row_count'].isnull()].reset_index(drop=True)
+        print("df_input_rows_with_no_match", len (df_input_rows_with_no_match))
+         
+        max_id = max(df_histo["id"]) if len(df_histo)>0 else 0
+        df_input_rows_with_no_match["id"] = df_input_rows_with_no_match.index + max_id + 1
+
+        df_result = pd.concat([df_histo[df_histo_initial_columns] , df_input_rows_with_no_match[df_histo_initial_columns] ])
+        print("df_result", len (df_result))
+
+        return { 'df_result' : df_result ,
+                 'nb_rows_input' : len(df_input),
+                 'nb_rows_histo' : len(df_histo),
+                 'nb_rows_added_to_histo' : len (df_input_rows_with_no_match)
+                }
