@@ -10,85 +10,61 @@ import datetime
 
 class WebScrapping_RatedComments():
     @staticmethod
-    def WebScrapping_Comments(url_to_scrap, nbr_pages):
-        html = requests.get(url_to_scrap)
-        # transformation de la page en un document exploitable
-        # Selon le parsers choisi (html.parser, lxml, lxml-xml, xml, html5lib)
-        soup = BeautifulSoup(html.text, 'html.parser')
-        # print(soup)
-        # Date du commentaire à récupérer
-        date_time = soup.find_all('time', {'class' : ""})
-        date_time[2]['datetime'][0:19].replace('T', ' ')
-
-        # Récupération du pays du commentaire
-        pays = soup.find_all('div', {"class" : "typography_body-m__xgxZ_ typography_appearance-subtle__8_H2l styles_detailsIcon__Fo_ua"})
-        # Récupération du commentaire
-        comment = soup.find_all('p' , {'class' : "typography_body-l__KUYFJ typography_appearance-default__AAY17 typography_color-black__5LYEn"})
-        print(comment[0].text)
-        # Note
-        note = soup.find_all('div', {"class" : "styles_reviewHeader__iU9Px"})
-        print(note[2]['data-service-review-rating'])
-
-        # Scrapping du commentaire
-        #Test de l'URL : 200 si OK, 402, si erreur, 403 si non autorisé par le site
-        url_test=url_to_scrap+'&page=2'
-        print(requests.get(url_test).status_code)
-
-        # initialisation de l'heure maintenant 
-        t0 = time()
-
-        # création de la liste des URL des pages regroupant données pour les 30 derniers jours
-        nb_pages = nbr_pages
+    def WebScrapping_Comments(liste_sites, nbr_pages):
+        print (liste_sites)
         liste_url = []
-        page = 1
-
-        while page <= nb_pages :
-            try :
-                url_page=url_to_scrap+'&page='+str(page)
-                if requests.get(url_page).status_code==200:
-                    liste_url.append(url_page)
-            except:
-                pass
-
-            page = page + 1
-
-        # scapping des données
+        # constitution des listes qui serviront à consolider les donnees
         liste_note = []
         liste_commentaire = []
         liste_date = []
-        liste_pays = []
+        liste_site = []
 
-        for url_to_scrap in tqdm(liste_url):
-            html = requests.get(url_to_scrap)
+        # initialisation de l'heure maintenant 
+        t0 = time()
+        # scapping des données
+        for site in liste_sites : 
+            print(site)
+            page = 1
+            while page <= nbr_pages :
+                try :
+                    if requests.get('https://fr.trustpilot.com/review/www.' + site + '?date=last30days&page=' + str(page)).status_code==200:
+                        liste_url.append('https://fr.trustpilot.com/review/www.' + site + '?date=last30days&page='+str(page))
+                except:
+                    pass
+                page = page + 1
+            
+            print(len(liste_url), "valid pages to scrap")
+
+        for url in liste_url:
+            html = requests.get(url)
             soup = BeautifulSoup(html.text, 'html.parser')
             comment = soup.find_all('p' , {'class' : "typography_body-l__KUYFJ typography_appearance-default__AAY17 typography_color-black__5LYEn"})
             note = soup.find_all('div', {"class" : "styles_reviewHeader__iU9Px"})
-            pays = soup.find_all('div', {"class" : "typography_body-m__xgxZ_ typography_appearance-subtle__8_H2l styles_detailsIcon__Fo_ua"})
             date_time = soup.find_all('time', {'class' : ""})
-            
+
             for nb_avis in range(len(comment)):
                 liste_note.append(note[nb_avis]['data-service-review-rating'])
                 liste_date.append(date_time[nb_avis]['datetime'][0:19].replace('T', ' '))
-                liste_pays.append(pays[nb_avis].span.text)
-                
+                liste_site.append(site)
+
                 try :
                     liste_commentaire.append(comment[nb_avis].text)
-                
+
                 except:
                     liste_commentaire.append('NaN')
 
             sleep(5)
-
+        
+        print(" scrap fini")
         # constitution d'un dictionnaire regroupant les données
-        dico = {'note' : liste_note, 'commentaire' : liste_commentaire, 'pays' : liste_pays, 'date' : liste_date}
+        dico = {'note' : liste_note, 'commentaire' : liste_commentaire, 'date' : liste_date, 'site' : liste_site}
 
         # constitution d'un DataFrame à partir du dictionnaire 
         df = pd.DataFrame(dico)
-        df['import_source'] = url_to_scrap
         # Get the current date and time
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        df['import_date'] = formatted_datetime
+        df['scrap_date'] = formatted_datetime
 
         # affichage du temps de calcul par rapport  à l'initialisation en début de requête 
         print('le temps de calcul est de {:.2f} secondes'.format(time()-t0))

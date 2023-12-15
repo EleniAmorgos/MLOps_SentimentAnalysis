@@ -12,6 +12,7 @@ from tqdm import tqdm
 from time import sleep
 from time import time
 
+
 from data.web_scrapping import WebScrapping_RatedComments
 from features.build_features import Process_Comments
 
@@ -40,10 +41,10 @@ class Scrapping_Request(BaseModel):
     """ Représente une requête de scrapping.
 
     Attributes:
-        • url: url à scrapper
+        • liste_sites : liste d'enseignes pour lesquelles on va scrapper les pages Trustpilor
         • nbr_pages: nbr de pages
     """
-    url: str
+    liste_sites : List
     nbr_pages: Optional[int] = 1
 
 
@@ -90,7 +91,7 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
         )
 
     scrap_request_dict = {
-        'url': scrap_request.url ,
+        'liste_sites': scrap_request.liste_sites ,
         'nbr_pages': scrap_request.nbr_pages
     }
     
@@ -105,7 +106,7 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
     csv_filepath = os.path.join(external_data_path, csv_filename)
     print(csv_filepath)
 
-    df = WebScrapping_RatedComments.WebScrapping_Comments(url_to_scrap=scrap_request_dict['url'], nbr_pages = scrap_request_dict['nbr_pages'])
+    df = WebScrapping_RatedComments.WebScrapping_Comments(liste_sites=scrap_request_dict['liste_sites'], nbr_pages = scrap_request_dict['nbr_pages'])
 
     print("Longueur du df : ", len(df))
     print(df.head(10))
