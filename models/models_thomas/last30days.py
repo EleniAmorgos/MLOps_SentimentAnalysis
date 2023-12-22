@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from time import sleep
 
 # definition du nombre de pages max à charger, liste des sites traites
-nb_pages = 60
+nb_pages = 2
 liste_sites = ['ubaldi.com', 'habitatetjardin.com', 'menzzo.fr', 'fnac.com', 'darty.com', 'temu.com', 'cdiscount.com']
 liste_url = []
 
@@ -23,7 +23,7 @@ liste_site = []
 
 # scapping des données
 for site in liste_sites : 
-    page = 1
+    page = 2
     while page <= nb_pages :
         try :
             if requests.get('https://fr.trustpilot.com/review/www.' + site + '?date=last30days&page=' + str(page)).status_code==200:
@@ -60,6 +60,10 @@ df = pd.DataFrame(dico)
 
 # update de de la base de donnée avec les valeur last30days 
 base_comments = pd.read_csv('datasets/SatisfactionClients/trustpilot_comments.csv', sep=';')
+
+date_comment_max = base_comments['date'].max()
+df = df[df['date']>date_comment_max]
+
 base_comments = base_comments.append(df, ignore_index=True)
 
 # enregistrement des nouvelles données : historique + last30days chargees
