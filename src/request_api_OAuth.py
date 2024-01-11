@@ -23,7 +23,7 @@ def get_access_token(username_to_test, password_to_test):
         return None
 
 
-# 3 types d'utilisateurs à tester :
+# 4 cas d'utilisateurs à tester :
 credentials_to_test = [
     {"username": "toto", "password": "titi", "role_to_test" : "username inexistant"},  
     {"username": "alice", "password": "wrongPwd", "role_to_test" : "username existant, mauvais pwd"},  
@@ -35,6 +35,11 @@ for credentials in credentials_to_test:
     username_to_test = credentials["username"]
     password_to_test = credentials["password"]
     print ("\n" , credentials["role_to_test"], ":")
+    
+    # Requête GET sur le point de terminaison non sécurisé
+    response = requests.get('http://127.0.0.1:8001/')
+    print(response.text)
+
     access_token = get_access_token(username_to_test,password_to_test)
 
     if access_token:
