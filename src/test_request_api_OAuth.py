@@ -1,8 +1,10 @@
 import requests
+import pytest
 
+url = 'http://127.0.0.1:8001'
 
 def get_access_token(username_to_test, password_to_test):
-    token_url = "http://127.0.0.1:8001/token"   
+    token_url = url+"/token"   
 
     data = {
         "username": username_to_test,
@@ -22,43 +24,143 @@ def get_access_token(username_to_test, password_to_test):
         print(f"Error: {response.status_code}, {response.text}")
         return None
 
+def test_get_access_token():
+    # Test with correct credentials
+    access_token = get_access_token("alice", "wonderland")
+    assert access_token is not None
 
-# 3 types d'utilisateurs à tester :
-credentials_to_test = [
-    {"username": "toto", "password": "titi", "role_to_test" : "username inexistant"},  
-    {"username": "alice", "password": "wrongPwd", "role_to_test" : "username existant, mauvais pwd"},  
-    {"username": "alice", "password": "wonderland", "role_to_test" : "user only"},  
-    {"username": "admin", "password": "TFH_dstMLOPS23", "role_to_test" : "user + admin"} 
-]
+    # Test with incorrect credentials
+    access_token = get_access_token("invalid_user", "invalid_password")
+    assert access_token is None
 
-for credentials in credentials_to_test:
-    username_to_test = credentials["username"]
-    password_to_test = credentials["password"]
-    print ("\n" , credentials["role_to_test"], ":")
-    access_token = get_access_token(username_to_test,password_to_test)
 
-    if access_token:
-        # print(f"Access Token: {access_token}")
-        # Header avec token
+def test_secured_endpoint():
+    credentials_to_test = [
+        {"username": "invalid_user", "password": "invalid_password" , "expected_status_code" : 500},  
+        {"username": "alice", "password": "wrongPwd", "expected_status_code" : 500},  
+        {"username": "alice", "password": "wonderland", "expected_status_code" : 200 },  
+        {"username": "admin", "password": "adminADMIN", "expected_status_code" : 200} 
+    ]
+
+    for credentials in credentials_to_test:
+        access_token = get_access_token(credentials["username"], credentials["password"])
         headers = {'Authorization': f'Bearer {access_token}'}
-        # Test du Endpoint sécurisé
-        response = requests.get('http://127.0.0.1:8001/secured', headers=headers)
-        print(response.text)
+        
+        response = requests.get(url + '/secured', headers=headers)
+        assert response.status_code == credentials["expected_status_code"]
 
-        # Scrapping de trustpilot  sur une liste d'enseignes 30 derniers jours sur N pages
-        payload = {
+
+def test_add_user():
+    payload_user_to_add = {"username": "new_user", "password": "new_password", "role": ["user"]}
+ 
+    not_admin_credentials = {"username": "alice", "password": "wonderland"}
+    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {not_admin_token}'}
+
+    # Test adding a user (should fail)
+    response = requests.post(url + '/add_user', headers=headers, json=payload_user_to_add)
+    assert response.status_code == 403
+
+    admin_credentials = {"username": "admin", "password": "adminADMIN"}
+    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {admin_token}'}
+
+    # Test adding a user (success)
+    response = requests.post(url + '/add_user', headers=headers, json=payload_user_to_add)
+    assert response.status_code == 200
+
+    # Test adding the same user again (should fail)
+    response = requests.post(url + '/add_user', headers=headers, json=payload_user_to_add)
+    assert response.status_code == 400
+
+
+
+
+def test_delete_user():
+    payload_user_to_delete = {"username": "new_user"}
+ 
+    not_admin_credentials = {"username": "alice", "password": "wonderland"}
+    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {not_admin_token}'}
+
+    # Test deleting a user (should fail)
+    response = requests.delete(url + '/delete_user', headers=headers, json=payload_user_to_delete)
+    assert response.status_code == 403
+
+    admin_credentials = {"username": "admin", "password": "adminADMIN"}
+    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {admin_token}'}
+
+    # Test deleting a user (success)
+    response = requests.delete(url + '/delete_user', headers=headers, json=payload_user_to_delete)
+    assert response.status_code == 200
+
+    # Test deleting the same user again (should fail)
+    response = requests.delete(url + '/delete_user', headers=headers, json=payload_user_to_delete)
+    assert response.status_code == 400
+
+        
+# ******************************************************************
+# ****************    SCRAPPING  ***********************************
+# ******************************************************************
+
+
+def test_scrap_last30days():
+    payload = {
             'liste_sites': ['ubaldi.com', 'habitatetjardin.com', 'menzzo.fr', 'fnac.com', 'darty.com', 'temu.com', 'cdiscount.com'],
             'nbr_pages': 1
         }
-        response = requests.post('http://127.0.0.1:8001/scrap_last30days', headers=headers, json=payload)
-        print(response.text)  
+ 
+    not_admin_credentials = {"username": "alice", "password": "wonderland"}
+    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {not_admin_token}'}
 
-        # Transformation des données
-        response = requests.post('http://127.0.0.1:8001/process_comments', headers=headers)
-        print(response.text)  
+    # Test scrapping as user (should fail)
+    response = requests.post(url+'/scrap_last30days', headers=headers, json=payload)
+    assert response.status_code == 403
 
-        # Historisation des données
-        response = requests.post('http://127.0.0.1:8001/histo_process_comments', headers=headers)
-        print(response.text)
-    else:
-        print("Echec de l'obtention du token")
+    admin_credentials = {"username": "admin", "password": "adminADMIN"}
+    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {admin_token}'}
+
+    # Test scrapping as admin (success)
+    response = requests.post(url+'/scrap_last30days', headers=headers, json=payload)
+    assert response.status_code == 200
+ 
+
+
+def test_process_comments():
+
+    not_admin_credentials = {"username": "alice", "password": "wonderland"}
+    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {not_admin_token}'}
+
+    # Test scrapping as user (should fail)
+    response = requests.post(url+'/process_comments', headers=headers)
+    assert response.status_code == 403
+
+    admin_credentials = {"username": "admin", "password": "adminADMIN"}
+    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {admin_token}'}
+
+    # Test scrapping as admin (success)
+    response = requests.post(url+'/process_comments', headers=headers)
+    assert response.status_code == 200
+
+def test_histo_process_comments():
+
+    not_admin_credentials = {"username": "alice", "password": "wonderland"}
+    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {not_admin_token}'}
+
+    # Test scrapping as user (should fail)
+    response = requests.post(url+'/histo_process_comments', headers=headers)
+    assert response.status_code == 403
+
+    admin_credentials = {"username": "admin", "password": "adminADMIN"}
+    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+    headers = {'Authorization': f'Bearer {admin_token}'}
+
+    # Test scrapping as admin (success)
+    response = requests.post(url+'/histo_process_comments', headers=headers)
+    assert response.status_code == 200

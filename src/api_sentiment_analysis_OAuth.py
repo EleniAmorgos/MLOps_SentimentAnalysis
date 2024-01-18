@@ -12,17 +12,16 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from time import sleep
 from time import time
-
+import json
 import jwt
 
 from datetime import datetime, timedelta
 
-import jwt
 
 from datetime import datetime, timedelta
 
-from src.data.web_scrapping import WebScrapping_RatedComments
-from src.features.build_features import Process_Comments
+from data.web_scrapping import WebScrapping_RatedComments
+from features.build_features import Process_Comments
 
 api = FastAPI(
     title="API Sentiment analysis",
@@ -49,6 +48,14 @@ SECRET_KEY = "secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRATION = 30
 
+class User(BaseModel):
+    username: str
+    password: str
+    role: List[str]
+class UserName(BaseModel):
+    username: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -66,29 +73,14 @@ class Scrapping_Request(BaseModel):
     liste_sites : List
     nbr_pages: Optional[int] = 1
 
-users_db = {
+with open('user_db/users_data.json', 'r') as file:
+    users_db = json.load(file)
 
-    "alice": {
-        "username": "alice",
-        "hashed_password": pwd_context.hash('wonderland'),
-        "role" : ["user"],
-    },
-    "bob": {
-        "username": "bob",
-        "hashed_password": pwd_context.hash('builder'),
-        "role" : ["user"],
-    },
-    "clementine": {
-        "username": "clementine",
-        "hashed_password": pwd_context.hash('mandarine'),
-        "role" : ["user"],
-    },
-    "admin" : {
-        "username" :  "admin",
-        "hashed_password" : pwd_context.hash('TFH_dstMLOPS23'),
-        "role" : ["user", "admin"],
-    }
-}
+# Fonction pour écrire les données dans le fichier JSON
+def write_users_to_json(users_data):
+    with open('user_db/users_data.json', 'w') as file:
+        json.dump(users_data, file, indent=2)
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -122,6 +114,24 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
+
+# ******************************************************************
+# ****************    HOME   ***************************************
+# ******************************************************************
+
+@api.get('/', tags=['home'])
+async def get_item():
+    """Point de terminaison pour vérifier que l'API est bien fonctionnelle 
+
+    Returns :
+        dict : message iniquant que l'API fonctionne correctement
+    """
+    return {'message' : 'API fonctionnelle'}
+
+# ******************************************************************
+# ****************    SECURITE  ************************************
+# ******************************************************************
+
 @api.post("/token", response_model=Token, tags=['security'])
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
@@ -154,15 +164,6 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     # If any exception occurs or authentication fails, raise HTTPException
     raise HTTPException(status_code=400, detail="Username ou password incorrect")
 
-@api.get('/', tags=['home'])
-async def get_item():
-    """Point de terminaison pour vérifier que l'API est bien fonctionnelle 
-
-    Returns :
-        dict : message iniquant que l'API fonctionne correctement
-    """
-    return {'message' : 'API fonctionnelle'}
-
 @api.get("/secured", tags=['home'])
 def read_private_data(current_user: str = Depends(get_current_user)):
     """
@@ -184,7 +185,79 @@ def read_private_data(current_user: str = Depends(get_current_user)):
 
 
 
+@api.post('/add_user', tags=['security'])
+async def add_user(new_user: User, current_user: str = Depends(get_current_user)):
+    """
+    Endpoint pour ajouter un nouvel utilisateur. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
 
+    Args:
+        new_user (User): Les données de l'utilisateur à ajouter.
+        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+
+    Returns:
+        dict: Un message indiquant si l'ajout de l'utilisateur a réussi.
+    """
+    if "admin" not in current_user["role"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission refusée. Seul un administrateur peut ajouter un utilisateur",
+        )
+
+    # Vérifier si l'utilisateur existe déjà
+    if new_user.username in users_db:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"L'utilisateur avec le nom {new_user.username} existe déjà.",
+        )
+    # Hasher le mot de passe
+    hashed_password = pwd_context.hash(new_user.password)
+
+    # Ajouter l'utilisateur à la base de données
+    users_db[new_user.username] = {
+        "username": new_user.username,
+        "hashed_password": hashed_password,
+        "role": new_user.role,
+    }
+    # Écrire les données mises à jour dans le fichier JSON
+    write_users_to_json(users_db)
+    return {'message': f"Utilisateur ajouté avec succès: {new_user.username}"}
+    
+
+
+@api.delete('/delete_user', tags=['security'])
+async def delete_user(user_to_delete: UserName, current_user: str = Depends(get_current_user)):
+    """
+    Endpoint pour supprimer un utilisateur. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
+
+    Args:
+        username_to_delete (str): Nom de l'utilisateur à supprimer.
+        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+
+    Returns:
+        dict: Un message indiquant si l'ajout de l'utilisateur a réussi.
+    """
+    if "admin" not in current_user["role"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission refusée. Seul un administrateur peut supprimer un utilisateur",
+        )
+
+    # Vérifier si l'utilisateur existe déjà
+    if user_to_delete.username not in users_db:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"L'utilisateur avec le nom {user_to_delete.username} n'existe pas.",
+        )
+
+    # Supprimer l'utilisateur de la base de données
+    del users_db[user_to_delete.username]
+    # Écrire les données mises à jour dans le fichier JSON
+    write_users_to_json(users_db)
+    return {'message': f"Utilisateur supprimé avec succès: {user_to_delete.username}"}
+    
+# ******************************************************************
+# ****************    SCRAPPING  ***********************************
+# ******************************************************************
 
 @api.post('/scrap_last30days', tags=['scrapping'])
 async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str = Depends(get_current_user)):
