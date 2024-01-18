@@ -17,8 +17,12 @@ import jwt
 
 from datetime import datetime, timedelta
 
-from data.web_scrapping import WebScrapping_RatedComments
-from features.build_features import Process_Comments
+import jwt
+
+from datetime import datetime, timedelta
+
+from src.data.web_scrapping import WebScrapping_RatedComments
+from src.features.build_features import Process_Comments
 
 api = FastAPI(
     title="API Sentiment analysis",
