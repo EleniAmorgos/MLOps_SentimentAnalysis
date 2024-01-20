@@ -1,0 +1,31 @@
+{
+  "alice": {
+    "username": "alice",
+    "hashed_password": "$2b$12$cwzR.3Wq9fFPLnqRmmpYLO/QxmWNnWn3.mNr1zcU06y0JxnmXA5eq",
+    "role": [
+      "user"
+    ]
+  },
+  "bob": {
+    "username": "bob",
+    "hashed_password": "$2b$12$/0fffn8t4qqNNNLkC5nL5uyuMIRzWNkLVfT7Yu46/cZ2Cjf/QFVxq",
+    "role": [
+      "user"
+    ]
+  },
+  "clementine": {
+    "username": "clementine",
+    "hashed_password": "$2b$12$KHy0ugAdeSnaYy.1YBGgd.WQ2wIuGKrAboRdowMwW20U5wLZWK1BS",
+    "role": [
+      "user"
+    ]
+  },
+  "admin": {
+    "username": "admin",
+    "hashed_password": "$2b$12$GarVP9MGCxqdQtVGVUg2MOnkan4gOsXUYvXmRP0IB9bYAU4tnvg/u",
+    "role": [
+      "user",
+      "admin"
+    ]
+  }
+}
