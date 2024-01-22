@@ -85,7 +85,7 @@ file = client.get_object(
 body = file['Body']
 csv_string = body.read().decode('utf-8')
 
-base_comments = pd.read_csv(StringIO(csv_string), sep=';')
+base_comments = pd.read_csv(StringIO(csv_string), sep=';', lineterminator='\n')
 
 # si base_comment en local on peut le charger avec une seule ligne ci-dessous
 # base_comments = pd.read_csv('datasets/SatisfactionClients/trustpilot_comments.csv', sep=';')
@@ -93,14 +93,14 @@ base_comments = pd.read_csv(StringIO(csv_string), sep=';')
 date_comment_max = base_comments['date'].max()
 df = df[df['date']>date_comment_max]
 
-base_comments = pd.concat([base_comments, df], ignore_index=True)
+base_comments2 = pd.concat([base_comments, df], axis=0, ignore_index=True)
 
 # enregistrement des nouvelles données : historique + last30days chargees
 # si en local 1 commande ci-dessous pour ecraser base_comments en local
 # #base_comments.to_csv('datasets/SatisfactionClients/trustpilot_comments.csv', sep=';', index=False)
 # sinon pour écraser le base_comments de AWS commande ci-dessous :
 
-base_comments.to_csv('base.csv', sep=';', index=False)
+base_comments2.to_csv('base.csv', sep=';', index=False)
 client.upload_file(Filename='base.csv', Bucket=bucket_name, Key=('data/trustpilot_comments.csv'))
 
 # enregistrement des nouvelles données : seulement last30days
