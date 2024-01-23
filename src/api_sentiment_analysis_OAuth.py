@@ -367,65 +367,65 @@ async def process_comments(current_user: str = Depends(get_current_user)):
 
 
 
-@api.post('/histo_process_comments', tags=['data management'])
-async def histo_process_comments(current_user: str = Depends(get_current_user)):
-    """
-    Endpoint pour historiser les commentaires scrappés. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
+# @api.post('/histo_process_comments', tags=['data management'])
+# async def histo_process_comments(current_user: str = Depends(get_current_user)):
+#     """
+#     Endpoint pour historiser les commentaires scrappés. Seuls les utilisateurs avec le rôle d'administrateur peuvent l'utiliser.
 
-    Args:
-        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+#     Args:
+#         current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
 
-    Returns:
-        dict: Un message indiquant si le data processing a réussi.
-    """
-    if "admin" not in current_user["role"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Permission refusée. Seul un administrateur peut historiser des données",
-        )
+#     Returns:
+#         dict: Un message indiquant si le data processing a réussi.
+#     """
+#     if "admin" not in current_user["role"]:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail=f"Permission refusée. Seul un administrateur peut historiser des données",
+#         )
 
-    # Nom du CSV où les données à historiser sont lues
-    csv_filename_input = 'scrapped_comments_processed.csv'
-    # Répertoire de données depuis le répertoire src
-    interim_data_path = os.path.join( '..', 'data', 'interim')
-    print("interim_data_path : ",interim_data_path)
-    # Construit le chemin complet pour atteindre le csv
-    csv_filepath_input = os.path.join(interim_data_path, csv_filename_input)
-    print("csv_filepath_input : ", csv_filepath_input)
-    # Vérifier l'existence du répertoire
-    if not os.path.exists(interim_data_path) or not os.path.isdir(interim_data_path):
-        print(f"Le répertoire {interim_data_path} n'existe pas.")
-        exit()
-    # Vérifier l'existence du fichier
-    if not os.path.exists(csv_filepath_input) or not os.path.isfile(csv_filepath_input):
-        print(f"Le fichier {csv_filepath_input} n'existe pas.")
-        exit()
-    # Le répertoire et le fichier existent, poursuivre avec le reste du code
-    print(f"Le répertoire {interim_data_path} et le fichier {csv_filepath_input} existent.")
+#     # Nom du CSV où les données à historiser sont lues
+#     csv_filename_input = 'scrapped_comments_processed.csv'
+#     # Répertoire de données depuis le répertoire src
+#     interim_data_path = os.path.join( '..', 'data', 'interim')
+#     print("interim_data_path : ",interim_data_path)
+#     # Construit le chemin complet pour atteindre le csv
+#     csv_filepath_input = os.path.join(interim_data_path, csv_filename_input)
+#     print("csv_filepath_input : ", csv_filepath_input)
+#     # Vérifier l'existence du répertoire
+#     if not os.path.exists(interim_data_path) or not os.path.isdir(interim_data_path):
+#         print(f"Le répertoire {interim_data_path} n'existe pas.")
+#         exit()
+#     # Vérifier l'existence du fichier
+#     if not os.path.exists(csv_filepath_input) or not os.path.isfile(csv_filepath_input):
+#         print(f"Le fichier {csv_filepath_input} n'existe pas.")
+#         exit()
+#     # Le répertoire et le fichier existent, poursuivre avec le reste du code
+#     print(f"Le répertoire {interim_data_path} et le fichier {csv_filepath_input} existent.")
 
-    # Nom du CSV où les données déjà historisées sont lues puis réécrites après ajout des nouvelles données
-    csv_filename_histo = 'processed_comments_histo.csv'
-    # Répertoire de données depuis le répertoire src
-    processed_data_path = os.path.join( '..', 'data', 'processed')
-    print("processed_data_path : ",processed_data_path)
-    # Construit le chemin complet pour atteindre le csv
-    csv_filepath_histo = os.path.join(processed_data_path, csv_filename_histo)
-    print("csv_filepath_histo : ", csv_filepath_histo)
-    # Vérifier l'existence du répertoire
-    if not os.path.exists(processed_data_path) or not os.path.isdir(processed_data_path):
-        print(f"Le répertoire {processed_data_path} n'existe pas.")
-        exit()
-    # Vérifier l'existence du fichier
-    if not os.path.exists(csv_filepath_histo) or not os.path.isfile(csv_filepath_histo):
-        print(f"Le fichier {csv_filepath_histo} n'existe pas.")
-        exit()
+#     # Nom du CSV où les données déjà historisées sont lues puis réécrites après ajout des nouvelles données
+#     csv_filename_histo = 'processed_comments_histo.csv'
+#     # Répertoire de données depuis le répertoire src
+#     processed_data_path = os.path.join( '..', 'data', 'processed')
+#     print("processed_data_path : ",processed_data_path)
+#     # Construit le chemin complet pour atteindre le csv
+#     csv_filepath_histo = os.path.join(processed_data_path, csv_filename_histo)
+#     print("csv_filepath_histo : ", csv_filepath_histo)
+#     # Vérifier l'existence du répertoire
+#     if not os.path.exists(processed_data_path) or not os.path.isdir(processed_data_path):
+#         print(f"Le répertoire {processed_data_path} n'existe pas.")
+#         exit()
+#     # Vérifier l'existence du fichier
+#     if not os.path.exists(csv_filepath_histo) or not os.path.isfile(csv_filepath_histo):
+#         print(f"Le fichier {csv_filepath_histo} n'existe pas.")
+#         exit()
 
-    # Le répertoire et le fichier existent, poursuivre avec le reste du code
-    print(f"Le répertoire {processed_data_path} et le fichier {csv_filepath_histo} existent.")
+#     # Le répertoire et le fichier existent, poursuivre avec le reste du code
+#     print(f"Le répertoire {processed_data_path} et le fichier {csv_filepath_histo} existent.")
 
-    result_dico = Process_Comments.Histo_New_Comments(csv_filepath_input,csv_filepath_histo)
-    df_result = result_dico['df_result']
-    df_result.to_csv(csv_filepath_histo, sep=';', quotechar='"', index=False)
-    print (result_dico['nb_rows_input'], result_dico['nb_rows_histo'], result_dico['nb_rows_added_to_histo'], len(df_result))
+#     result_dico = Process_Comments.Histo_New_Comments(csv_filepath_input,csv_filepath_histo)
+#     df_result = result_dico['df_result']
+#     df_result.to_csv(csv_filepath_histo, sep=';', quotechar='"', index=False)
+#     print (result_dico['nb_rows_input'], result_dico['nb_rows_histo'], result_dico['nb_rows_added_to_histo'], len(df_result))
 
-    return {'message': f"Data written to: {csv_filepath_histo} : {str(result_dico['nb_rows_added_to_histo'])} rows added to {str(result_dico['nb_rows_histo'])} in histo : {str(len(df_result))} in total"}
+#     return {'message': f"Data written to: {csv_filepath_histo} : {str(result_dico['nb_rows_added_to_histo'])} rows added to {str(result_dico['nb_rows_histo'])} in histo : {str(len(df_result))} in total"}

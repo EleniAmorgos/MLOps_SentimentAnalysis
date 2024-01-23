@@ -147,20 +147,20 @@ def test_process_comments():
     response = requests.post(url+'/process_comments', headers=headers)
     assert response.status_code == 200
 
-def test_histo_process_comments():
+# def test_histo_process_comments():
 
-    not_admin_credentials = {"username": "alice", "password": "wonderland"}
-    not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
-    headers = {'Authorization': f'Bearer {not_admin_token}'}
+#     not_admin_credentials = {"username": "alice", "password": "wonderland"}
+#     not_admin_token = get_access_token(not_admin_credentials["username"], not_admin_credentials["password"])
+#     headers = {'Authorization': f'Bearer {not_admin_token}'}
 
-    # Test scrapping as user (should fail)
-    response = requests.post(url+'/histo_process_comments', headers=headers)
-    assert response.status_code == 403
+#     # Test scrapping as user (should fail)
+#     response = requests.post(url+'/histo_process_comments', headers=headers)
+#     assert response.status_code == 403
 
-    admin_credentials = {"username": "admin", "password": "adminADMIN"}
-    admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
-    headers = {'Authorization': f'Bearer {admin_token}'}
+#     admin_credentials = {"username": "admin", "password": "adminADMIN"}
+#     admin_token = get_access_token(admin_credentials["username"], admin_credentials["password"])
+#     headers = {'Authorization': f'Bearer {admin_token}'}
 
-    # Test scrapping as admin (success)
-    response = requests.post(url+'/histo_process_comments', headers=headers)
-    assert response.status_code == 200
+#     # Test scrapping as admin (success)
+#     response = requests.post(url+'/histo_process_comments', headers=headers)
+#     assert response.status_code == 200
