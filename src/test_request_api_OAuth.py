@@ -36,8 +36,8 @@ def test_get_access_token():
 
 def test_secured_endpoint():
     credentials_to_test = [
-        {"username": "invalid_user", "password": "invalid_password" , "expected_status_code" : 500},  
-        {"username": "alice", "password": "wrongPwd", "expected_status_code" : 500},  
+        {"username": "invalid_user", "password": "invalid_password" , "expected_status_code" : 401},  
+        {"username": "alice", "password": "wrongPwd", "expected_status_code" : 401},  
         {"username": "alice", "password": "wonderland", "expected_status_code" : 200 },  
         {"username": "admin", "password": "adminADMIN", "expected_status_code" : 200} 
     ]

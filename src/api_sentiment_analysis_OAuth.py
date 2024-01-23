@@ -15,8 +15,7 @@ from time import time
 import json
 import jwt
 
-from datetime import datetime, timedelta
-
+from jwt.exceptions import ExpiredSignatureError, DecodeError
 
 from datetime import datetime, timedelta
 
@@ -106,7 +105,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except ExpiredSignatureError:
+        raise credentials_exception
+    except DecodeError:
         raise credentials_exception
     token_data = TokenData(username=username)
     user = users_db.get(username, None)
