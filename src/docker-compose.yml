@@ -1,0 +1,37 @@
+version: "3"
+services:
+  api:
+    image: dropolic/alpine-api-image:latest
+    container_name: api
+    networks:
+      - my_network_api
+    volumes:
+      - ./src/:/usr/src
+    ports:
+      - target: 8001
+        published: 8001
+        protocol: tcp
+        mode: host
+  streamlit:
+    image: thomasfourtouill/streamlit:latest
+    container_name: streamlit
+    depends_on: 
+      - api
+    networks:
+      - my_network_api
+    volumes:
+      - ./src/:/usr/src
+    ports:
+      - "8000:8000"
+  pytest:
+    image: dropolic/ubuntu-test-image:latest
+    container_name: pytest
+    depends_on: 
+      - api
+    networks:
+      - my_network_api
+    ports:
+      - "8002:8002"
+networks:
+  my_network_api:
+    driver: bridge
