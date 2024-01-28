@@ -22,7 +22,7 @@ services:
     volumes:
       - ./src/:/usr/src
     ports:
-      - "8000:8000"
+      - "8003:8003"
   pytest:
     image: dropolic/ubuntu-test-image:latest
     container_name: pytest
