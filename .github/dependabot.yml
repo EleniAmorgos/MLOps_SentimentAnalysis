@@ -1,0 +1,36 @@
+version: 2
+updates:
+# Fetch and update dependencies of the Dockerfile
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "00:00" 
+  open-pull-requests-limit: 10
+  reviewers:
+    - frederic
+  assignees:
+    - frederic
+  commit-message:
+    prefix: fix
+    prefix-development: fix
+    include: 
+      - "docker-compose.yml"
+      - "Dockerfile"
+# Fetch and update latest "github-actions" version
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "00:00" 
+  open-pull-requests-limit: 10
+  reviewers:
+    - frederic
+  assignees:
+    - frederic
+  commit-message:
+    prefix: fix
+    prefix-development: fix
+    include: 
+      - ".github/workflows"
+```
