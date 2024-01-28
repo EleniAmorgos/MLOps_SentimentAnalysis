@@ -6,19 +6,15 @@ on:
       - master
 
 jobs:
-  ci:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: [3.9]
+  testing01:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@master
+    - name: Checkout
+      uses: actions/checkout@master
 
-      - name: Node CI 
-        uses: octodemo/devoxx-2021-node@master
-        with:
-          node-version: ${{ matrix.node }}
+    - name: Node CI 
+      uses: octodemo/devoxx-2021-node@master
+      with:
+        node-version: ${{ matrix.node }}
