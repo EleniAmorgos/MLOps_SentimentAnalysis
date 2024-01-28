@@ -13,4 +13,4 @@ jobs:
         uses: thomasfourtouill/DockerRun-Action@v1
         with:
           image: scrapping:latest
-          run: python3 last30days.py
+          run: CMD python3 last30days.py
