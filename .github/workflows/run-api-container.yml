@@ -10,5 +10,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Run Docker container to api
         uses: docker://dropolic/alpine-api-image:latest
+        with:
+          image: api_sentiment_analysis_OAuth:latest
+          run: CMD python3 api_sentiment_analysis_OAuth.py
       - name: Verify assets
         run: ls -l dist
