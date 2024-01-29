@@ -1,19 +1,23 @@
 name: Running API container
-on: push
+on:
+  workflow_dispatch:
 
 jobs:
-  compile:
-    name: Running API container
+  docker:
+    name: Run image built
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
+      - name: Check repository
+        uses: actions/checkout@v3
+        
+      - name: Build docker image
 
-      - name: Run Docker container for API
-        run: |
-          docker pull dropolic/alpine-api-image:latest
-          docker run -d --name container-api-alpine -v ${{ github.workspace }}: dropolic/alpine-api-image:latest
-          docker exec container-api-alpine python3 /src/api_sentiment_analysis_OAuth.py
-
+      - name: Run Image
+        uses: c-schicho/DockerRun-Action@v1
+        with:
+          image: dropolic/alpine-api-image
+          run: echo "hello world"
+          
       - name: Verify assets
         run: ls -l dist
+
