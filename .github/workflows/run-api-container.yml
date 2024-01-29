@@ -1,0 +1,14 @@
+name: Running api container
+on: push
+
+jobs:
+  compile:
+    name: Running api container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Run Docker container to api
+        uses: docker://dropolic/alpine-api-image:latest
+      - name: Verify assets
+        run: ls -l dist
