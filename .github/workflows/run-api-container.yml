@@ -1,17 +1,23 @@
-name: Running api container
+name: Running API container
 on: push
 
 jobs:
   compile:
-    name: Running api container
+    name: Running API container
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: Run Docker container to api
-        uses: docker://dropolic/alpine-api-image:latest
-        with:
-          image: api_sentiment_analysis_OAuth:latest
-          run: CMD python3 api_sentiment_analysis_OAuth.py
+
+      # Ensure your environment is prepared for Docker operations
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Run Docker container for API
+        run: |
+          docker pull dropolic/alpine-api-image:latest
+          docker run -d --name api_container -v ${{ github.workspace }}:/app dropolic/alpine-api-image:latest
+          docker exec api_container python3 /app/api_sentiment_analysis_OAuth.py
+
       - name: Verify assets
         run: ls -l dist
