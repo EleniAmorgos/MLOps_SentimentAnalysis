@@ -12,8 +12,8 @@ jobs:
       - name: Run Docker container for API
         run: |
           docker pull dropolic/alpine-api-image:latest
-          docker run -d --name container-api-alpine -v ${{ github.workspace }}: dropolic/alpine-api-image:latest
-          docker exec container-api-alpine python3 api_sentiment_analysis_OAuth.py
+          docker run -d --name container-api-alpine -v ${{ github.workspace }}:/bin/sh dropolic/alpine-api-image:latest
+          docker exec container-api-alpine python3 /src/api_sentiment_analysis_OAuth.py
 
       - name: Verify assets
         run: ls -l dist
