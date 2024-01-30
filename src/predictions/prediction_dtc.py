@@ -7,6 +7,8 @@ Created on Mon Jan  9 00:30:02 2023
 
 import numpy as np
 import pickle
+from sklearn.tree import DecisionTreeClassifier
+
 
 comment = 'comment transmis par streamlit dans les params'
 
