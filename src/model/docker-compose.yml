@@ -1,0 +1,14 @@
+version: "3"
+services:
+  api:
+    image: thomasfourtouill/model
+    container_name: model
+    volumes:
+      - $HOME/src/:/files
+volumes:
+  project_data:
+  driver: local
+  driver_opts:
+    device: $HOME/src
+
+

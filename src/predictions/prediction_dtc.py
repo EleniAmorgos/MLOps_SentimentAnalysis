@@ -10,8 +10,10 @@ import pickle
 
 comment = 'comment transmis par streamlit dans les params'
 
-vectorizer_fit = pickle.load(open('vec_dtc.pickle', 'rb'))
-model = pickle.load(open('model_dtc.pickle', 'rb'))
+def predict(comment):
+    vectorizer_fit = pickle.load(open('files/vec_dtc.pickle', 'rb'))
+    model = pickle.load(open('files/model_dtc.pickle', 'rb'))
 
-pred = model.predict(vectorizer_fit.transform([comment]))[0]
-print ("predicted class:", pred)
+    pred = model.predict(vectorizer_fit.transform([comment]))[0]
+    
+    return ("predicted class:", pred)
