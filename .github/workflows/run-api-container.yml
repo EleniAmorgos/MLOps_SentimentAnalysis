@@ -1,22 +1,18 @@
-name: Run API container
-
 on: push
-
 jobs:
-  docker:
-    
-    name: Run image built
+  build-container:
+    name: Build Container
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Check repository
-        uses: actions/checkout@v2
-
-      - name: Run Image
-        run: |
-          docker pull dropolic/alpine-api-image:latest
-          docker run -d --name container-api-alpine -v ${{ github.workspace }}:/src dropolic/alpine-api-image:latest
-          docker exec container-api-alpine python3 /src/api_sentiment_analysis_OAuth.py
-      
-      - name: Verify assets
-        run: ls -l dist
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: dropolic/alpine-api-image:latest, dropolic/alpine-api-image:${{ github.run_number }}
