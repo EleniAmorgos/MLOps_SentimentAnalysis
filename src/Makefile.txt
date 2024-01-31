@@ -1,1 +1,14 @@
+# Makefile for MLOps Project with Docker
 
+# Variables
+DOCKER_IMAGE_NAME = alpine-api-image
+DOCKER_CONTAINER_NAME = container-api-alpine
+
+# Targets and Rules
+.PHONY: build-docker run-docker
+
+build-docker:
+	docker build -t $(DOCKER_IMAGE_NAME) .
+
+run-docker:
+	docker run --name $(DOCKER_CONTAINER_NAME) -d $(DOCKER_IMAGE_NAME)
