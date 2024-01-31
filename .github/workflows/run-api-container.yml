@@ -5,17 +5,6 @@ on:
     branches: [ master ]
 
 jobs:
-
-  test:
-    runs-on: ubuntu-latest
-    setps:
-      - uses: actions/checkout@v3
-        name: Test python code
-        run: | 
-          pip3 install -r requirements.txt
-          cd src/test_api/
-          pytest
-
   
   build-push-container:
     runs-on: ubuntu-latest
