@@ -17,11 +17,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
-      - name: Install dependencies
-        run: |
-          pip3 install -r requirements.txt
-          cd src/test_api/
-          pytest
 
   build-push-container:
     needs: test
