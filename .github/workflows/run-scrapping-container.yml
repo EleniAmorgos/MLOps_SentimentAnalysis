@@ -1,1 +1,24 @@
+name: Run scrapping container
 
+on: push
+
+jobs:
+  docker:
+    
+    name: Run image built
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Pull and Run Docker Image
+        run: |
+          docker pull dropolic/python-scrapping-image:latest
+          docker run -d --rm --name container-scrapping-python -p 8000:8000 dropolic/python-scrapping-image:latest
+
+      - name: Check running containers
+        run: docker ps
