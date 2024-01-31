@@ -4,25 +4,35 @@ on: push
 
 jobs:
 
-  build and run container:
-
-    name: Build container
+  test:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    setps:
+      - uses: actions/checkout@v3
+        name: Test python code
+        run: | 
+          pip3 install -r requirements.txt
+          cd src/test_api/
+          pytest
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-      
-      - name: Build and push Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          contexte: .
-          push: true
-          tags: dropolic/alpine-api-image:latest, dropolic/alpine-api-image:${{ github.sha }}
   
-      - name: Run Docker Image
-        run: /
-          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+  build-push-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: |
+          docker build -t dropolic/alpine-api-image:${GITHUB_SHA} .
+          docker tag  dropolic/fast-api:${GITHUB_SHA} dropolic/alpine-api-image:latest
+          docker images
+          docker run -d -p 8001:8001 --name fastapi dropolic/alpine-api-image:${GITHUB_SHA}
+          sleep 10
+          docker login -u ${{ secrets.REGISTRY_USER  }} -p ${{ secrets.REGISTRY_PASSWD  }}
+          docker push dropolic/alpine-api-image:${GITHUB_SHA}
+          docker push dropolic/alpine-api-image:latest
+    
+    run-container:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+          run: /
+            docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
