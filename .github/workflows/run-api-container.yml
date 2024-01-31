@@ -26,14 +26,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Build the Docker image
         run: |
-          docker build -t dropolic/alpine-api-image:${{ github.sha }} .
-          docker tag dropolic/alpine-api-image:${{ github.sha }} dropolic/alpine-api-image:latest
+          docker build -t dropolic/alpine-api:${{ github.sha }} .
+          docker tag dropolic/alpine-api:${{ github.sha }} dropolic/alpine-api:latest
           docker images
-          docker run -d -p 8001:8001 --name fastapi dropolic/alpine-api-image:${{ github.sha }}
+          docker run -d -p 8020:8020 --name fastapi dropolic/alpine-api:${{ github.sha }}
           sleep 10
           docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWD }}
-          docker push dropolic/alpine-api-image:${{ github.sha }}
-          docker push dropolic/alpine-api-image:latest
+          docker push dropolic/alpine-api:${{ github.sha }}
+          docker push dropolic/alpine-api:latest
 
   run-container:
     runs-on: ubuntu-latest
@@ -42,4 +42,4 @@ jobs:
         uses: actions/checkout@v2
       - name: Run the Docker container
         run: |
-          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+          docker run -d --name container-api -p 8020:8020 dropolic/alpine-api:latest
