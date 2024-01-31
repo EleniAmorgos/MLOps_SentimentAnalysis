@@ -1,1 +1,26 @@
+name: Run preprocessing container
 
+on: push
+
+jobs:
+  docker:
+    
+    name: Run image built
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build the Docker image
+        uses: actions/checkout@v3
+
+      - name: Pull and Run Docker Image
+        run: |
+          docker run -d --rm --name container-preprocessing-python -p 8000:8000 dropolic/python-preprocessing-image:latest
+
+      - name: Check running containers
+        run: docker ps
