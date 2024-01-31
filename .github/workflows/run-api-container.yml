@@ -25,13 +25,7 @@ jobs:
           contexte: .
           push: true
           tags: dropolic/alpine-api-image:latest, dropolic/alpine-api-image:${{ github.sha }}
-          
-
-      name: Run image built
-      runs-on: ubuntu-latest
-    
-      steps:
-
-          name: Run Docker Image
-          run: /
-            docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+  
+      - name: Run Docker Image
+        run: /
+          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
