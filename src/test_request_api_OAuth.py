@@ -1,6 +1,7 @@
 import requests
 import pytest
 
+
 url = 'http://127.0.0.1:8001'
 
 def get_access_token(username_to_test, password_to_test):
@@ -188,16 +189,17 @@ def test_prediction():
     headers = {'Authorization': f'Bearer {user_token}'}
 
     response = requests.post(url+'/prediction', json=payload, headers=headers)
-    # Vérifier que la réponse a un code HTTP 200 (OK)
+    # Vérifie que la réponse a un code HTTP 200 (OK)
     assert response.status_code == 200
 
     # Analyse la réponse JSON
     result = response.json()
 
-    # Vérifier que le résultat contient les clés attendues
+    # Vérifie que le résultat contient les clés / formats attendus
     assert "predicted class" in result
     assert "probabilité de négatif et positif" in result
     assert "message" in result
 
     assert result["message"] == "Prédiction fonctionnelle"
+    assert len(result["probabilité de négatif et positif"]) == 2
 
