@@ -6,7 +6,7 @@ services:
     networks:
       - my_network_api
     volumes:
-      - $HOME/src/:/files
+      - $HOME/src:/files
     ports:
       - target: 8001
         published: 8001
@@ -21,12 +21,13 @@ services:
     networks:
       - my_network_api
     volumes:
-      - $HOME/src/:/files
+      - $HOME/src:/files
     ports:
       - target: 8002
         published: 8002
         protocol: tcp
         mode: host
+    command: "pytest > /files/pytest_output.txt"
 
   streamlit:
     image: thomasfourtouill/streamlit:latest
@@ -35,19 +36,12 @@ services:
       - api
     networks:
       - my_network_api
-    volumes:
-      - $HOME/src/:/files
     ports:
       - target: 8501
         published: 8501
         protocol: tcp
         mode: host
+
 networks:
   my_network_api:
     driver: bridge
-volumes:
-  project_data:
-    driver: local
-    driver_opts:
-      device: $HOME/src
-
