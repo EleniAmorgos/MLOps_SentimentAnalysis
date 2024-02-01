@@ -20,19 +20,21 @@ Project Organization
     │
     ├── src                <- Source code for use in this project.
     │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── user_db           <- User data base in jason
-    │   │   └── users_data.json : user data base    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── web_scrapping.py : Scraps comments from Trustpilot
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py : Processes and archives the comments (new comments into histo)
-    │   │
-    │   ├── predictions         <- Scripts using trained models to make predictions
-    │   │   │                 
-    │   │   ├── prediction_class.py
+    │   │── api
+    │   │   ├── user_db           <- User data base in jason
+    │   │   │   └── users_data.json : user data base    │   │
+    │   │   ├── data           <- Scripts to download or generate data
+    │   │   │   └── web_scrapping.py : Scraps comments from Trustpilot
     │   │   │
+    │   │   ├── features       <- Scripts to turn raw data into features for modeling
+    │   │   │   └── build_features.py : Processes and archives the comments (new comments into histo)
+    │   │   │
+    │   │   ├── predictions         <- Scripts using trained models to make predictions
+    │   │   │   │                 
+    │   │   │   ├── prediction_class.py
+    │   │   │
+    │   │── Streamlit
+        
     │   └── config         <- Describe the parameters used in train_model.py and predict_model.py
 
 --------
