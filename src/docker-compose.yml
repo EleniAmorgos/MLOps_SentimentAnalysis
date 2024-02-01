@@ -1,0 +1,47 @@
+version: "3"
+services:
+  api:
+    image: dropolic/alpine-api-image:latest
+    container_name: api
+    networks:
+      - my_network_api
+    volumes:
+      - $HOME/src:/files
+    ports:
+      - target: 8001
+        published: 8001
+        protocol: tcp
+        mode: host
+
+  pytest:
+    image: dropolic/ubuntu-test-image:latest
+    container_name: pytest
+    depends_on: 
+      - api
+    networks:
+      - my_network_api
+    volumes:
+      - $HOME/src:/files
+    ports:
+      - target: 8002
+        published: 8002
+        protocol: tcp
+        mode: host
+    command: "pytest > /files/pytest_output.txt"
+
+  streamlit:
+    image: thomasfourtouill/streamlit:latest
+    container_name: streamlit
+    depends_on: 
+      - api
+    networks:
+      - my_network_api
+    ports:
+      - target: 8501
+        published: 8501
+        protocol: tcp
+        mode: host
+
+networks:
+  my_network_api:
+    driver: bridge
