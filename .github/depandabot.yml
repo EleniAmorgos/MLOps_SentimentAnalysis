@@ -1,0 +1,8 @@
+version: 2
+
+updates:
+  - package-ecosystem: docker
+    directory: "~/.github/workflows/run-api-container.yml"
+    schedule:
+      interval: "daily"
+      time: "12:41" 

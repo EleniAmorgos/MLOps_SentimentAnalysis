@@ -1,0 +1,16 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    name: Run image built by previous step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Build docker image
+      - name: Run Image
+        uses: thomasfourtouill/DockerRun-Action@v1
+        with:
+          image: scrapping:latest
+          run: CMD python3 last30days.py

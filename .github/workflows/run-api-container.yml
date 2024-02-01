@@ -1,0 +1,41 @@
+name: Build and run API container
+
+on: push
+
+jobs:
+  checkout-repository:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+  test:
+    runs-on: ubuntu-latest
+    needs: checkout-repository
+    steps:
+      - name: Test python code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+  build-push-container:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: dropolic/alpine-api-image:latest, dropolic/alpine-api-image:${{ github.run_number }}
+
+  run-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Run the Docker container
+        run: |
+          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
