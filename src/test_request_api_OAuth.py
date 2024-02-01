@@ -164,3 +164,40 @@ def test_process_comments():
 #     # Test scrapping as admin (success)
 #     response = requests.post(url+'/histo_process_comments', headers=headers)
 #     assert response.status_code == 200
+
+
+
+
+        
+# ******************************************************************
+# ****************    PREDICTION  **********************************
+# ******************************************************************
+    
+
+
+def test_prediction():
+
+    comment = "C est un commentaire de test."
+    payload = {
+            'comment': comment
+        }
+ 
+    # Test scrapping as user (success)
+    user_credentials = {"username": "alice", "password": "wonderland"}
+    user_token = get_access_token(user_credentials["username"], user_credentials["password"])
+    headers = {'Authorization': f'Bearer {user_token}'}
+
+    response = requests.post(url+'/prediction', json=payload, headers=headers)
+    # Vérifier que la réponse a un code HTTP 200 (OK)
+    assert response.status_code == 200
+
+    # Analyse la réponse JSON
+    result = response.json()
+
+    # Vérifier que le résultat contient les clés attendues
+    assert "predicted class" in result
+    assert "probabilité de négatif et positif" in result
+    assert "message" in result
+
+    assert result["message"] == "Prédiction fonctionnelle"
+

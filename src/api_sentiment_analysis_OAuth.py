@@ -14,6 +14,10 @@ from time import sleep
 from time import time
 import json
 import jwt
+import pickle
+import numpy as np
+import sklearn
+
 
 from jwt.exceptions import ExpiredSignatureError, DecodeError
 
@@ -21,6 +25,7 @@ from datetime import datetime, timedelta
 
 from data.web_scrapping import WebScrapping_RatedComments
 from features.build_features import Process_Comments
+from predictions.prediction_class import Predict_Sentiments
 
 api = FastAPI(
     title="API Sentiment analysis",
@@ -61,6 +66,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+class Comment(BaseModel):
+    comment: str
 
 class Scrapping_Request(BaseModel):
     """ Représente une requête de scrapping.
@@ -197,6 +206,9 @@ async def add_user(new_user: User, current_user: str = Depends(get_current_user)
 
     Returns:
         dict: Un message indiquant si l'ajout de l'utilisateur a réussi.
+
+    Raises:
+        HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "admin").
     """
     if "admin" not in current_user["role"]:
         raise HTTPException(
@@ -236,6 +248,9 @@ async def delete_user(user_to_delete: UserName, current_user: str = Depends(get_
 
     Returns:
         dict: Un message indiquant si l'ajout de l'utilisateur a réussi.
+
+    Raises:
+        HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "admin").
     """
     if "admin" not in current_user["role"]:
         raise HTTPException(
@@ -257,7 +272,7 @@ async def delete_user(user_to_delete: UserName, current_user: str = Depends(get_
     return {'message': f"Utilisateur supprimé avec succès: {user_to_delete.username}"}
     
 # ******************************************************************
-# ****************    SCRAPPING  ***********************************
+# ****************    SCRAPPING  / PREPROCESSING *******************
 # ******************************************************************
 
 @api.post('/scrap_last30days', tags=['scrapping'])
@@ -271,6 +286,9 @@ async def scrap_last30days(scrap_request: Scrapping_Request, current_user: str =
 
     Returns:
         dict: Un message indiquant si la création a réussi.
+
+    Raises:
+        HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "admin").
     """
     if "admin" not in current_user["role"]:
         raise HTTPException(
@@ -317,6 +335,10 @@ async def process_comments(current_user: str = Depends(get_current_user)):
 
     Returns:
         dict: Un message indiquant si le data processing a réussi.
+
+    Raises:
+        HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "admin").
+
     """
     if "admin" not in current_user["role"]:
         raise HTTPException(
@@ -429,3 +451,40 @@ async def process_comments(current_user: str = Depends(get_current_user)):
 #     print (result_dico['nb_rows_input'], result_dico['nb_rows_histo'], result_dico['nb_rows_added_to_histo'], len(df_result))
 
 #     return {'message': f"Data written to: {csv_filepath_histo} : {str(result_dico['nb_rows_added_to_histo'])} rows added to {str(result_dico['nb_rows_histo'])} in histo : {str(len(df_result))} in total"}
+
+
+    
+# ******************************************************************
+# ****************        PREDICTION             *******************
+# ******************************************************************
+
+
+@api.post('/prediction', tags=['sentiment_analysis'])
+async def prediction(comment: Comment, current_user: str = Depends(get_current_user)):
+    """
+    Endpoint pour prédire. Seuls les utilisateurs avec le rôle d'utilisateur peuvent l'utiliser.
+
+    Args:
+        comment (str): Commentaire
+        current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
+
+    Returns:
+        Un dictionnaire contenant la prédiction de classe, les probabilités pour 0 et 1 (liste), et un message de statut.
+            - Si la prédiction est réussie, le message indique que la prédiction est fonctionnelle.
+            - Si le vectorizer ou le modèle est introuvable, le message indique l'erreur recontrée.
+            - En cas d'erreur inattendue, un message d'erreur général est renvoyé.
+ 
+    Raises:
+        HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "user").
+
+    """
+    if "user" not in current_user["role"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission refusée. Seul un utilisateur peut réaliser une prédiction",
+        )
+
+    return Predict_Sentiments.Predict_Sentiments_DTC(comment.comment)
+
+
+
