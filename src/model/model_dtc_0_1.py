@@ -10,13 +10,11 @@ import numpy as np
 import boto3
 from io import StringIO
 import pickle
-from joblib import dump
 
 import datetime
 import os
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report
+import sklearn
 
 pd.set_option('mode.chained_assignment', None)
 
@@ -48,6 +46,8 @@ csv_string_retired_0_1 = body_retired_0_1.read().decode('utf-8')
 
 comment_retired_0_1 = pd.read_csv(StringIO(csv_string_retired_0_1), sep=';')
 
+print('les données sont chargées')
+
 # suppression des valeurs manquantes
 comment_retired_0_1 = comment_retired_0_1[comment_retired_0_1['commentaire'].isna()==False]
 
@@ -60,6 +60,10 @@ y = comment_retired_0_1['note']
 
 # transformation des notes 1 et 2 en 0 (sentiment négatif) et 4 et 5 en 1 (sentiment positif)
 y = y.replace({'1' : '0', '2' : '0', '4' : '1', '5' : '1'})
+
+print('les données sont préprocessées')
+
+print('Entrainement du modèle')
 
 # séparation du jeu de données en un dataset d'entrainement et un dataset de test
 from sklearn.model_selection import train_test_split
@@ -76,24 +80,28 @@ vectorizer_fit = vectorizer.fit(X_train)
 X_train = vectorizer.fit_transform(X_train).todense()
 X_test = vectorizer.transform(X_test).todense()
 
-X_train = np.asarray(X_train)
-X_test = np.asarray(X_test)
+# X_train = np.asarray(X_train)
+# X_test = np.asarray(X_test)
 
 #Save vectorizer.vocabulary_
-pickle.dump(vectorizer.vocabulary_, open("vec_vocab_dtc.pickle","wb"))
+pickle.dump(vectorizer.vocabulary_, open("vec_vocab_dtc.pkl","wb"))
 
 #Save vectorizer
-pickle.dump(vectorizer_fit, open("vec_dtc.pickle","wb"))
+pickle.dump(vectorizer_fit, open("vect_dtc.pkl","wb"))
 
+print('le vectorizer est enregistré')
 
 # calcul du model
+from sklearn.tree import DecisionTreeClassifier
+
 clf = DecisionTreeClassifier(max_depth=10)
 
 clf.fit(X_train, y_train)
 
 # enregistrement des donnees retraitees negatif positif en local dans src 
-pickle.dump(clf, open('model_dtc.pickle', 'wb'))
+pickle.dump(clf, open('model_dtc.pkl', 'wb'))
 
+print('le modèle est entrainé et enregistré')
 
 # calcul des prédictions
 y_pred = clf.predict(X_test)
@@ -102,6 +110,8 @@ model_score_dtc = clf.score(X_test, y_test)
 
 with open('model_score_dtc.txt', 'w') as score:
     score.write(str(model_score_dtc))
+    
+print('le score du modèle est enregistré')
 
 # # vérification des résultats sur un jeu de test externe (100 commentaires amazon également répartis entre les étoiles)
 # df_test_token = vectorizer.transform(df_test['commentaire']).todense()
