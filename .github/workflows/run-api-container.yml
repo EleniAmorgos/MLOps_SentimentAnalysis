@@ -24,12 +24,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Build Docker image
-        uses: docker/build-push-action@v2
+      - name: Build the Docker image
+        run: |
+          docker build . -t alpine-api-image
+          docker tag alpine-api-image dropolic/alpine-api-image:latest
+          docker images
+          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+          sleep 10
+          docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWD }}
+          docker push dropolic/alpine-api-image:latest
+
+  deploy:
+    needs: build-push-container
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
         with:
-          context: .
-          push: true
-          tags: dropolic/alpine-api-image:latest, dropolic/alpine-api-image:${{ github.run_number }}
+          host: ${{ secrets.HOSTNAME  }}
+          username: ${{ secrets.USER_NAME  }}
+          key: ${{ secrets.AWS_PRIVATE_KEY  }}
+          port: 22
+          script: |
+            sudo docker rm -f alpine-api-image
+            sudo docker rmi dropolic/alpine-api-image:latest
+            sleep 10 
+            sudo docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+            sudo docker ps 
+            sleep 10 
+            curl localhost:8001
+            ls 
+            sudo docker images
 
   run-container:
     runs-on: ubuntu-latest
