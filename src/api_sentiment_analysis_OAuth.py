@@ -34,10 +34,10 @@ api = FastAPI(
     openapi_tags=[
         {'name': 'home', 'description': 'Fonctions de base'},
         {'name': 'security', 'description': 'Fonctions réservées à la sécurisation de l API'},
-        {'name': 'sentiment_analysis', 'description': 'Fonctions d analyse des sentiments'},
         {'name': 'scrapping', 'description': 'Fonctions réservées à la génération de nouvelles données'},
         {'name': 'data management', 'description': 'Fonctions réservées à la génération de nouvelles données'},
-        {'name': 'training', 'description': 'Fonctions réservées l entrainement de modèles'}
+        {'name': 'training', 'description': 'Fonctions réservées l entrainement de modèles'},
+        {'name': 'sentiment_analysis', 'description': 'Fonctions d analyse des sentiments'}
 ]
 )
 
@@ -469,10 +469,13 @@ async def prediction(comment: Comment, current_user: str = Depends(get_current_u
         current_user (str): Nom de l'utilisateur actuel obtenu à partir des informations d'authentification.
 
     Returns:
-        Un dictionnaire contenant la prédiction de classe, les probabilités pour 0 et 1 (liste), et un message de statut.
-            - Si la prédiction est réussie, le message indique que la prédiction est fonctionnelle.
-            - Si le vectorizer ou le modèle est introuvable, le message indique l'erreur recontrée.
-            - En cas d'erreur inattendue, un message d'erreur général est renvoyé.
+        Un dictionnaire contenant :
+            - la prédiction de classe (0 ou 1 si la prédiction a fonctionné, -1 sinon)
+            - les probabilités pour 0 et 1 (liste)
+            - et un message de statut.
+                - Si la prédiction est réussie, le message indique que la prédiction est fonctionnelle.
+                - Si le vectorizer ou le modèle est introuvable, le message indique l'erreur recontrée.
+                - En cas d'erreur inattendue, un message d'erreur général est renvoyé.
  
     Raises:
         HTTPException: Si l'utilisateur n'a pas les permissions nécessaires (rôle "user").
