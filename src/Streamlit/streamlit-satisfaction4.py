@@ -5,9 +5,21 @@ Created on Mon Jan  9 00:30:02 2023
 @author: t.fourtouill
 """
 
+# CHARGEMENT DES LIBRAIRIES
+
+import pandas as pd
+from pathlib import Path
+import numpy as np
+
 import streamlit as st
 from PIL import Image
 import requests
+
+import pickle
+
+pd.options.display.max_colwidth=800
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
 
 # DEFINITION DES FONCTIONS : il faudra remplacer l'IP par le nom du container qui contient l'api
 # et le port par le port exposé par l'api
@@ -27,8 +39,8 @@ def token_api(url, username, password):
         'password': password,
         },
     headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'accept: application/json',
+        'Content-Type: application/x-www-form-urlencoded'
     }
     
     token = requests.get(url_token, params=params, headers=headers)
@@ -83,19 +95,6 @@ st.sidebar.markdown("Developed by Thomas FOURTOUILL using [Streamlit](https://ww
 st.sidebar.markdown("Current Version: 0.0.2")
 
 
-# CHARGEMENT DES LIBRAIRIES
-
-import pandas as pd
-from pathlib import Path
-import numpy as np
-
-import pickle
-
-pd.options.display.max_colwidth=800
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-
-
 # INSTANCIATON DES PAGES (ICI 2 PAGES)
 
 page = st.sidebar.radio(label='page n°', options=[1, 2])
@@ -134,6 +133,7 @@ if page==1:
    
     if st.button("Générer un token"):
         response_token = token_api(url, user_id, passe_id)
+        st.write(response_token)
         st.session_state['token'] = response_token
         
         st.write('Voici votre token : ', st.session_state['token'])

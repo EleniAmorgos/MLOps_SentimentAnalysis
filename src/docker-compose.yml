@@ -1,12 +1,10 @@
 version: "3"
 services:
   api:
-    image: dropolic/alpine-api-image:latest
+    image: dropolic/python-api-image:latest
     container_name: api
     networks:
       - my_network_api
-    volumes:
-      - $HOME/src:/files
     ports:
       - target: 8001
         published: 8001
@@ -20,17 +18,14 @@ services:
       - api
     networks:
       - my_network_api
-    volumes:
-      - $HOME/src:/files
     ports:
       - target: 8002
         published: 8002
         protocol: tcp
         mode: host
-    command: "pytest > /files/pytest_output.txt"
 
   streamlit:
-    image: thomasfourtouill/streamlit:latest
+    image: thomasfourtouill/streamlit-v2:latest
     container_name: streamlit
     depends_on: 
       - api
