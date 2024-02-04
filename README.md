@@ -48,8 +48,35 @@ Project Organization
     │   │   │   └── dockerfile : Dockerfile pour le build de l'image streamlit
     │   │   │   └── requirements.txt : packages pour le build de l'image streamlit
     │   │   │   └── streamlit-satisfaction4.py : code python du streamlit
-    │   │   │   
-    │   └── config         <- Describe the parameters used in train_model.py and predict_model.py
+    │   │   │
+    │   │── data        <-  recupération des commentaires scrappés depuis l'api
+    │   │   │
+    │   │── model      <-  contient les éléments du build de l'image docker qui réentraine le modèle via une git action
+    │   │   │   └── dockerfile : Dockerfile pour le build de l'image model
+    │   │   │   └── requirements.txt : packages pour le build de l'image model
+    │   │   │   └── accesKeys.csv : clés de connexion au bucket S3 public contenant la base de donnée de commentaires    
+    │   │   │    
+    │   │── scrapp    <-  contient les éléments du build de l'image docker qui scrapp les données sur truspilot et les enregistre sur S3 via une git action
+    │   │   │   └── scrapping
+    │   │   │   │   └── dockerfile : Dockerfile pour le build de l'image scrapping
+    │   │   │   │   └── requirements.txt : packages pour le build de l'image scrapping
+    │   │   │   │   └── accesKeys.csv : clés de connexion au bucket S3 public contenant la base de donnée de commentaires
+    │   │   │   │   └── last30days.py : fichier python correspondant aux scrapp des nouvelles données pour MAJ de la BDD de commentaires
+    │   │   │
+    │   │── preprocessing   <- contient les éléments du build de l'image docker qui preprocesse les données scrappées depuis S3 via une git action
+    │   │   │   └── dockerfile : Dockerfile pour le build de l'image preprocessing
+    │   │   │   └── requirements.txt : packages pour le build de l'image preprocessing 
+    
+    │   │   │
+    │   │── test_api          <-  
+    │   │   │
+    │   │── trainning         <-  
+    │   │   │    
+    │   │── Makefile          <-
+    │   │   │    
+    │   │── Docker-compose.yml    <-
+    │   │   │        
+    │   └── config            <- Describe the parameters used in train_model.py and predict_model.py
 
 --------
 
