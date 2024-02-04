@@ -6,16 +6,17 @@ This project is a MLOps project based on the subject "sentiment analysis".
 Project Organization
 ------------
 
-    ├── LICENSE
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources (Web scrapping)
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    │── .github
+    │   ├── workflows
+    │   │   ├── run-api-container.yml : git action qui build l'image puis la pousse vers dockerhub test + latest. puis déploy l'image api latest sur un serveur DS
+    │   │   ├── run-model-container.yml : git action qui lance le réentraienement du modèle dtc à partir des commentaires stockés dans un bucket S3
+    │   │   ├── run-preprocessing-container.yml : git action qui la lance le preprocessing des commentaires stockés dans un bucket S3
+    │   │   └── run-scrapping-container.yml : git action qui la lance le scrapping des commentaires depuis le site web Trustpilot et les stocke dans un bucket S3
+    │   └── depandabot.yml : schedule des git actions 
     │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
+    ├── LICENSE
+    │
+    ├── README.md          <- The top-level README for developers using this project.
     │
     ├── src                <- Source code for use in this project.
     │   │ 
@@ -49,6 +50,10 @@ Project Organization
     │   │   └── streamlit-satisfaction4.py : code python du streamlit
     │   │   
     │   │── data        <-  recupération des commentaires scrappés depuis l'api
+    │   │   ├── external       <- Data from third party sources (Web scrapping)
+    │   │   ├── interim        <- Intermediate data that has been transformed.
+    │   │   ├── processed      <- The final, canonical data sets for modeling.
+    │   │   └── raw            <- The original, immutable data dump.
     │   │  
     │   │── model      <-  contient les éléments du build de l'image docker qui réentraine le modèle via une git action
     │   │   ├── dockerfile : Dockerfile pour le build de l'image model
@@ -72,17 +77,19 @@ Project Organization
     │   │── test_api          <-  contient les éléments du build de l'image docker qui test l'API via des tests unitaires
     │   │   ├── dockerfile : Dockerfile pour le build de l'image pytest
     │   │   ├── requirements.txt : packages pour le build de l'image pytest 
-    │   │   └── last30days.py : fichier python correspondant aux scrapp des nouvelles données pour MAJ de la BDD de commentaires    
+    │   │   └── test_request_api_OAuth.py : fichier python correspondant aux tests unitaire de l'API   
     │   │   
     │   │── trainning         <-  stockage du modèle mis à jour par le lancement du container model via une git action 
     │   │   ├── model_dtc.pkl : modèle entrainé. sert pour restituer les prédictions. issu du réentrainement du modèle par la git action
     │   │   └── vect_dtc.pkl : vectorization des données du modele. issu du réentrainement du modèle par la git action
     │   │       
-    │   │── Makefile          <-
+    │   │── Makefile : clean les images en cours et éxécute le docker compose qui lance les containers api, pytest et streamlit
     │   │       
-    │   │── Docker-compose.yml    <-
-    │   │           
-    │   └── config            <- Describe the parameters used in train_model.py and predict_model.py
+    │   └── Docker-compose.yml : lance les containers api, pytest et streamlit
+    │              
+    │── .gitignore : fichier regroupant les fichiers et dossier à ne pas aficher
+    │
+    └── config       <- Describe the parameters used in train_model.py and predict_model.py
 
 --------
 
