@@ -21,6 +21,7 @@ jobs:
         run: |
           docker build ./src/api -t build-api-image:test
           docker tag build-api-image:test dropolic/build-api-image:latest
+          docker tag build-api-image:test dropolic/build-api-image:test
           docker images
           docker run -d --name container-api-build -p 8008:8001 build-api-image:test
           sleep 10
