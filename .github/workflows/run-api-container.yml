@@ -8,60 +8,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-  test:
-    runs-on: ubuntu-latest
-    needs: checkout-repository
-    steps:
-      - name: Test python code
-        uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
 
   build-push-container:
-    needs: test
+    needs: checkout-repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Build the Docker image
         run: |
-          docker build . -t alpine-api-image
-          docker tag alpine-api-image dropolic/alpine-api-image:latest
+          docker build ./src/api -t build-api-image:test
+          docker tag build-api-image:test dropolic/build-api-image:latest
           docker images
-          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+          docker run -d --name container-api-build -p 8008:8001 dropolic/build-api-image:test
           sleep 10
           docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWD }}
-          docker push dropolic/alpine-api-image:latest
-
-  deploy:
-    needs: build-push-container
-    name: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOSTNAME  }}
-          username: ${{ secrets.USER_NAME  }}
-          key: ${{ secrets.AWS_PRIVATE_KEY  }}
-          port: 22
-          script: |
-            sudo docker rm -f alpine-api-image
-            sudo docker rmi dropolic/alpine-api-image:latest
-            sleep 10 
-            sudo docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
-            sudo docker ps 
-            sleep 10 
-            curl localhost:8001
-            ls 
-            sudo docker images
-
-  run-container:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Run the Docker container
-        run: |
-          docker run -d --name container-api-alpine -p 8001:8001 dropolic/alpine-api-image:latest
+          docker push dropolic/build-api-image:test
+          docker push dropolic/build-api-image:latest
