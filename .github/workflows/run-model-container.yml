@@ -1,0 +1,22 @@
+name: Run model container
+
+on: push
+
+jobs:
+  docker:
+    name: Run image built
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Pull and Run Docker Image
+        run: |
+          docker run -d --rm --name container-model-python -p 8006:8006 dropolic/python-model-image:latest
+
+      - name: Check running containers
+        run: docker ps
