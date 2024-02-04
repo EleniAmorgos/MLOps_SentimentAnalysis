@@ -16,7 +16,7 @@ jobs:
 
       - name: Pull and Run Docker Image
         run: |
-          docker run -d --rm --name container-model-python -p 8006:8006 -v ~/src/trainning:/files dropolic/python-model-image:latest
+          docker run -d --rm --name container-model-python -p 8006:8006 -v ./src/trainning:/files dropolic/python-model-image:latest
 
       - name: Check running containers
         run: docker ps
